@@ -11,6 +11,8 @@
  * the License.
  */
 
+import java.util.*
+
 plugins {
     `kotlin-dsl`
     kotlin("jvm")
@@ -24,21 +26,61 @@ repositories {
     mavenCentral()
 }
 
+val GROUP: String by project
+val VERSION_NAME: String by project
+
 gradlePlugin {
     plugins {
         register("faktory-kmmbridge-plugin") {
-            id = "co.touchlab.faktory.kmmbridge"
+            id = "${GROUP}.kmmbridge"
             implementationClass = "co.touchlab.faktory.KMMBridgePlugin"
             displayName = "KMMBridge for Teams"
         }
     }
 }
 
-pluginBundle {
-    website = "https://github.com/touchlab/KMMBridge"
-    vcsUrl = "https://github.com/touchlab/KMMBridge.git"
+ext["signing.keyId"] = null
+ext["signing.password"] = null
+ext["signing.secretKeyRingFile"] = null
+ext["ossrhUsername"] = null
+ext["ossrhPassword"] = null
+val localPropsFile = rootProject.file("local.properties")
+if (localPropsFile.exists()) {
+    localPropsFile.reader()
+        .use { Properties().apply { load(it) } }
+        .onEach { (name, value) -> ext[name.toString()] = value.toString() }
+} else {
+    ext["signing.keyId"] = System.getenv("SIGNING_KEY_ID")
+    ext["signing.password"] = System.getenv("SIGNING_PASSWORD")
+    ext["signing.secretKeyRingFile"] = System.getenv("SIGNING_SECRET_KEY_RING_FILE")
+    ext["ossrhUsername"] = System.getenv("OSSRH_USERNAME")
+    ext["ossrhPassword"] = System.getenv("OSSRH_PASSWORD")
+}
+fun getExtraString(name: String) = ext[name]?.toString()
 
-    description = "KMMBridge is a set of Gradle tooling that facilitates publishing and consuming pre-built KMM (Kotlin Multiplatform Mobile) Xcode Framework binaries."
+publishing {
+    repositories {
+        // 发布到本地
+        mavenLocal {
+            name = "local"
+            url = uri("${project.buildDir}/repo")
+        }
+        maven {
+            name = "release"
+            setUrl("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            credentials {
+                username = getExtraString("ossrhUsername")
+                password = getExtraString("ossrhPassword")
+            }
+        }
+    }
+}
+
+pluginBundle {
+    website = ""
+    vcsUrl = ""
+
+    description = ""
 
     tags = listOf("kmm", "kotlin", "multiplatform", "mobile", "ios", "xcode", "framework", "binary", "publish", "consume")
 }
@@ -64,14 +106,11 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-val GROUP: String by project
-val VERSION_NAME: String by project
-
 group = GROUP
 version = VERSION_NAME
 
 mavenPublishing {
-    publishToMavenCentral()
+//    publishToMavenCentral()
     val releaseSigningEnabled =
         project.properties["RELEASE_SIGNING_ENABLED"]?.toString()?.equals("false", ignoreCase = true) != true
     if (releaseSigningEnabled) signAllPublications()

@@ -139,12 +139,13 @@ interface KmmBridgeExtension {
         specRepoUrl: String,
         allowWarnings: Boolean = true,
         verboseErrors: Boolean = false,
+        commitMessage: String = ""
     ) {
         kotlin.cocoapods // This will throw error if we didn't apply cocoapods plugin
 
         val dependencyManager = CocoapodsDependencyManager({
             SpecRepo.Private(specRepoUrl)
-        }, allowWarnings, verboseErrors)
+        }, allowWarnings, verboseErrors, commitMessage)
 
         dependencyManagers.set(dependencyManagers.getOrElse(emptyList()) + dependencyManager)
     }
@@ -158,10 +159,11 @@ interface KmmBridgeExtension {
     fun Project.cocoapodsTrunk(
         allowWarnings: Boolean = true,
         verboseErrors: Boolean = false,
+        commitMessage: String = ""
     ) {
         kotlin.cocoapods // This will throw error if we didn't apply cocoapods plugin
 
-        val dependencyManager = CocoapodsDependencyManager({ SpecRepo.Trunk }, allowWarnings, verboseErrors)
+        val dependencyManager = CocoapodsDependencyManager({ SpecRepo.Trunk }, allowWarnings, verboseErrors, commitMessage)
 
         dependencyManagers.set(dependencyManagers.getOrElse(emptyList()) + dependencyManager)
     }

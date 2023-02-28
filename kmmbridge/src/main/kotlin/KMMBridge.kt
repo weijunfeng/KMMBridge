@@ -185,6 +185,8 @@ class KMMBridgePlugin : Plugin<Project> {
             dependencyManager.configure(this, uploadTask, publishRemoteTask)
         }
 
+        val findXCFrameworkAssembleTask = findXCFrameworkAssembleTask()
+        println("kmmbridge zipTask dependsOn task(${findXCFrameworkAssembleTask.name})")
         zipTask.configure {
             dependsOn(findXCFrameworkAssembleTask())
         }

@@ -43,6 +43,7 @@ class MavenPublishArtifactManager(
         }
 
         publishingTasks().forEach {
+            println("kmmbridge uploadTask dependsOn task(${it.name})")
             uploadTask.configure {
                 dependsOn(it)
             }

@@ -33,7 +33,8 @@ sealed class SpecRepo {
 class CocoapodsDependencyManager(
     private val specRepoDeferred: () -> SpecRepo,
     private val allowWarnings: Boolean,
-    private val verboseErrors: Boolean
+    private val verboseErrors: Boolean,
+    private val commitMessage: String
 ) : DependencyManager {
     override fun configure(project: Project, uploadTask: TaskProvider<Task>, publishRemoteTask: TaskProvider<Task>) {
 
@@ -68,6 +69,10 @@ class CocoapodsDependencyManager(
 
                     if (verboseErrors) {
                         extras.add("--verbose")
+                    }
+
+                    if (commitMessage.isNotEmpty()) {
+                        extras.add("--commit-message=\"${commitMessage}\"")
                     }
 
                     when (val specRepo = specRepoDeferred()) {
