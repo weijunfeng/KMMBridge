@@ -26,3 +26,15 @@ To provide feedback about your experience with KMMBridge join the conversation i
 >
 > We build solutions that get teams started smoothly with Kotlin Multiplatform Mobile and ensure their success in production. Join our community to learn how your peers are adopting KMM.
  [Sign up here](https://go.touchlab.co/newsletter-gh)!
+
+## other
+Add the plugin
+
+Take the `build.gradle(.kts)` file located at the root of your Kotlin Multiplatform project,
+and add the following at the top of the file:
+
+```kts
+plugins {
+    id("io.github.wjf510.kmmbridge") version "0.3.5"
+}
+```
