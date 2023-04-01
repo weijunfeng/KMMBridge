@@ -9,7 +9,6 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.api.tasks.bundling.AbstractArchiveTask
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.kotlin.dsl.getByType
 import java.io.File
@@ -85,20 +84,23 @@ class MavenPublishArtifactManager(
         // Either the user has supplied a correct name, or we use the default. If neither is found, fail.
         val publicationNameCap =
             publishingExtension.publications.getByName(publicationName ?: FRAMEWORK_PUBLICATION_NAME).name.capitalize()
-
-        return publishingExtension.repositories.filterIsInstance<MavenArtifactRepository>().map { repo ->
-            val repositoryName = repo.name.capitalize()
-            val publishTaskName = "publish${publicationNameCap}PublicationTo${repositoryName}Repository"
-            // Verify that the "publish" task exists before collecting
-            project.tasks.named(publishTaskName)
-        }
+        val findArtifactRepository = findArtifactRepository(publishingExtension)
+        return publishingExtension.repositories.filterIsInstance<MavenArtifactRepository>()
+            .filter {
+                it.name.capitalize() == findArtifactRepository.name
+            }
+            .map { repo ->
+                val repositoryName = repo.name.capitalize()
+                val publishTaskName = "publish${publicationNameCap}PublicationTo${repositoryName}Repository"
+                // Verify that the "publish" task exists before collecting
+                project.tasks.named(publishTaskName)
+            }
     }
 
     private fun findArtifactRepository(publishingExtension: PublishingExtension): MavenArtifactRepository =
         repositoryName?.let {
             publishingExtension.repositories.findByName(it) as MavenArtifactRepository
-        } ?: publishingExtension.repositories.filterIsInstance<MavenArtifactRepository>().firstOrNull()
-        ?: throw GradleException("Artifact repository not found, please, specify maven repository\n" +
+        }?: throw GradleException("Artifact repository not found, please, specify maven repository\n" +
                 "publishing {\n" +
                 "    repositories {\n" +
                 "        maven {\n" +

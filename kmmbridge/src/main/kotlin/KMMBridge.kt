@@ -155,6 +155,7 @@ class KMMBridgePlugin : Plugin<Project> {
                     versionFile.writeText(version)
                     logger.info("Uploading XCFramework version $version")
                     val deployUrl = artifactManager.deployArtifact(project, zipFile, version)
+                    println("kmmbridge uploadXCFramework result deployUrl(${deployUrl})")
                     urlFile.writeText(deployUrl)
 
                     val markerVersionString = versionManager.createMarkerVersion(project, version)
